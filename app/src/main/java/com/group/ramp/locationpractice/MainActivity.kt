@@ -13,16 +13,20 @@ import android.os.Build.VERSION.SDK
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+
+    private var TAG = "MainActivity"
 
     private var permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
     lateinit var locationManager: LocationManager
     private var gpsCapable = false
     private var networkCapable = false
-    private lateinit var gpsLocation : Location
-    private lateinit var networkLocation: Location
+    private var gpsLocation : Location? = null
+    private var networkLocation: Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,11 +34,18 @@ class MainActivity : AppCompatActivity() {
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if(checkPermission(permissions)) {
+                getLocationBtn.setOnClickListener {
+                    getLocation()
+                }
                 Toast.makeText(this, "Permission Granted", Toast.LENGTH_LONG).show()
             } else {
                 requestPermissions(permissions, 0)
             }
         }
+
+
+
+
     }
 
     private fun enableView() {
@@ -54,19 +65,18 @@ class MainActivity : AppCompatActivity() {
                     override fun onLocationChanged(location: Location?) {
                         if (location != null) {
                             gpsLocation = location
+                            longitudeTxt.text = "${gpsLocation!!.longitude}"
+                            latitudeTxt.text = "${gpsLocation!!.latitude}"
                         }
                     }
 
                     override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                     }
 
                     override fun onProviderEnabled(p0: String?) {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                     }
 
                     override fun onProviderDisabled(p0: String?) {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                     }
 
                 })
@@ -82,19 +92,18 @@ class MainActivity : AppCompatActivity() {
                     override fun onLocationChanged(location: Location?) {
                         if (location != null) {
                             gpsLocation = location
+                            longitudeTxt.text = "${networkLocation!!.longitude}"
+                            latitudeTxt.text = "${networkLocation!!.latitude}"
                         }
                     }
 
                     override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                     }
 
                     override fun onProviderEnabled(p0: String?) {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                     }
 
                     override fun onProviderDisabled(p0: String?) {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                     }
 
                 })
@@ -106,7 +115,14 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (gpsLocation != null && networkLocation != null) {
-
+                if(gpsLocation!!.accuracy > networkLocation!!.accuracy) {
+                    longitudeTxt.text = "${gpsLocation!!.longitude}"
+                    latitudeTxt.text = "${gpsLocation!!.latitude}"
+                }
+                else {
+                    longitudeTxt.text = "${networkLocation!!.longitude}"
+                    latitudeTxt.text = "${networkLocation!!.latitude}"
+                }
             }
 
         } else {
